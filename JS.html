@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senja Coffee - JS Features Edition</title>
+    
+    <!-- 1. Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- 2. FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&family=Dancing+Script:wght@600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+
+    <!-- 3. Chart.js CDN (Fitur Baru) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* --- CUSTOM OVERRIDES & VARIABLES --- */
+        :root {
+            --bs-primary: #4A3B32;       /* Coffee Dark */
+            --bs-secondary: #8D6E63;     /* Coffee Light */
+            --bs-light: #FFF8E1;         /* Cream Paper */
+            --bs-dark: #2D1B15;          /* Leather Dark */
+            --gold: #C5A059;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Smooth Scroll Global (Fallback) */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, .navbar-brand {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* --- NAVBAR STYLING --- */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            margin-left: 1rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        /* Indikator Active Menu */
+        .nav-link.active {
+            color: var(--bs-primary) !important;
+            font-weight: 700;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--bs-secondary);
+        }
+
+        /* --- HORIZONTAL SCROLL SECTION --- */
+        .horizontal-scroll-wrapper {
+            height: 400vh;
+            position: relative;
+        }
+
+        .sticky-viewport {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .horizontal-track {
+            display: flex;
+            height: 100%;
+            width: 300vw;
+            will-change: transform;
+        }
+
+        .h-slide {
+            width: 100vw;
+            height: 100vh;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .h-slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1;
+        }
+
+        .h-slide-content {
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .h-slide.active .h-slide-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .bg-slide-1 { background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=1950'); }
+        .bg-slide-2 { background-image: url('https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1950'); }
+        .bg-slide-3 { background-image: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1950'); }
+
+        /* --- 3D BOOK SECTION --- */
+        .parallax-section {
+            background-image: url('https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=1950');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            min-height: 120vh;
+            position: relative;
+            perspective: 1500px;
+            overflow: hidden;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .book-container {
+            width: 350px;
+            height: 500px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease-out;
+            margin: 0 auto;
+        }
+
+        .book-page {
+            position: absolute;
+            inset: 0;
+            border-radius: 4px 16px 16px 4px;
+            transform-origin: left center;
+            transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+            backface-visibility: hidden;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            background-color: var(--bs-light);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z' fill='%23d9cbb8' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        .cover-page {
+            background-color: var(--bs-dark);
+            color: var(--gold);
+            border: 2px solid #3E2723;
+            border-left: 12px solid #1a100c;
+            z-index: 10;
+        }
+
+        .book-page.flipped { transform: rotateY(-180deg); }
+
+        #page1 { z-index: 5; }
+        #page2 { z-index: 4; }
+        #page3 { z-index: 3; }
+        #page4 { z-index: 2; }
+
+        .menu-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: var(--bs-primary);
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .menu-item { border-bottom: 1px dashed #ccc; }
+
+        @media (max-width: 576px) {
+            .book-container { width: 90vw; height: 65vh; }
+            .display-1 { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#mainNav" data-bs-offset="100">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg fixed-top shadow-sm" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand text-primary fw-bold" href="#home">
+                <i class="fas fa-coffee me-2"></i>Senja Coffee
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <!-- Class 'active' akan diatur oleh JS -->
+                    <li class="nav-item"><a class="nav-link" href="#home" onclick="smoothScroll(event, 'home')">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#menu" onclick="smoothScroll(event, 'menu')">Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about" onclick="smoothScroll(event, 'about')">Story</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-primary text-white px-4 ms-lg-3 mt-2 mt-lg-0 rounded-pill" href="#contact" onclick="smoothScroll(event, 'contact')">Reservasi</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HOME SECTION (Horizontal Scroll) -->
+    <div id="home" class="horizontal-scroll-wrapper">
+        <div class="sticky-viewport">
+            <div class="horizontal-track">
+                
+                <div class="h-slide bg-slide-1 d-flex justify-content-center align-items-center active">
+                    <div class="h-slide-content text-center text-white px-3">
+                        <h1 class="display-1 fw-bold">Selamat Datang</h1>
+                        <p class="lead">Kenyamanan dalam setiap tegukan.</p>
+                        <div class="mt-4">
+                            <small class="text-uppercase tracking-widest border border-white px-3 py-1 rounded-pill">Scroll Down <i class="fas fa-arrow-down ms-2"></i></small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-slide bg-slide-2 d-flex justify-content-center align-items-center">
+                    <div class="h-slide-content text-center text-white px-3">
+                        <h1 class="display-1 fw-bold">Biji Pilihan</h1>
+                        <p class="lead">Dipetik langsung dari dataran tinggi terbaik Nusantara.</p>
+                    </div>
+                </div>
+
+                <div class="h-slide bg-slide-3 d-flex justify-content-center align-items-center">
+                    <div class="h-slide-content text-center text-white px-3">
+                        <h1 class="display-1 fw-bold">Suasana Tenang</h1>
+                        <p class="lead">Tempat pelarian terbaik dari hiruk pikuk kota.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU SECTION (3D Book) -->
+    <section id="menu" class="parallax-section d-flex flex-column justify-content-center align-items-center py-5">
+        
+        <div class="zoom-controls bg-white p-2 rounded shadow-sm d-flex flex-column gap-2">
+            <small class="text-center fw-bold text-primary" style="font-size: 0.7rem;">ZOOM</small>
+            <button class="btn btn-primary btn-sm rounded-circle" onclick="zoomBook(0.1)"><i class="fas fa-plus"></i></button>
+            <button class="btn btn-primary btn-sm rounded-circle" onclick="zoomBook(-0.1)"><i class="fas fa-minus"></i></button>
+            <button class="btn btn-outline-secondary btn-sm rounded-circle" onclick="resetZoom()"><i class="fas fa-redo"></i></button>
+        </div>
+
+        <div class="container text-center mb-4 text-white position-relative" style="z-index: 2;">
+            <div class="bg-white text-primary d-inline-block px-5 py-2 rounded-pill shadow">
+                <h2 class="m-0 h3">Buku Menu</h2>
+            </div>
+        </div>
+
+        <div class="book-container">
+            <!-- Cover -->
+            <div class="book-page cover-page d-flex align-items-center justify-content-center p-3" id="page1">
+                <div class="border border-3 border-warning w-100 h-100 d-flex flex-column justify-content-center align-items-center p-3" style="border-style: double !important; color: var(--gold);">
+                    <i class="fas fa-coffee fa-3x mb-3 opacity-75"></i>
+                    <h1 class="display-4 fw-bold" style="font-family: 'Cinzel', serif;">SENJA<br>COFFEE</h1>
+                    <div class="bg-warning my-3" style="width: 50px; height: 2px; background-color: var(--gold) !important;"></div>
+                    <p class="letter-spacing-2 small text-uppercase">Premium Selection</p>
+                    <small class="mt-auto opacity-75">EST. 2024</small>
+                </div>
+            </div>
+
+            <!-- Page 2 -->
+            <div class="book-page p-4 d-flex flex-column" id="page2">
+                <div class="border border-primary h-100 p-3 d-flex flex-column">
+                    <h3 class="menu-title text-center mb-4 pb-2">Signature</h3>
+                    <div class="menu-list flex-grow-1">
+                        <div class="menu-item d-flex justify-content-between align-items-baseline mb-3 pb-2">
+                            <div><h5 class="h6 text-primary mb-0 fw-bold">Espresso Robusta</h5><small class="text-muted fst-italic">Strong & Bold</small></div><span class="fw-bold text-primary">18k</span>
+                        </div>
+                        <div class="menu-item d-flex justify-content-between align-items-baseline mb-3 pb-2">
+                            <div><h5 class="h6 text-primary mb-0 fw-bold">Caramel Macchiato</h5><small class="text-muted fst-italic">Espresso, Milk, Caramel</small></div><span class="fw-bold text-primary">28k</span>
+                        </div>
+                        <div class="menu-item d-flex justify-content-between align-items-baseline mb-3 pb-2">
+                            <div><h5 class="h6 text-primary mb-0 fw-bold">Senja Aren Latte</h5><small class="text-muted fst-italic">Best Seller</small></div><span class="fw-bold text-primary">25k</span>
+                        </div>
+                    </div>
+                    <small class="text-center text-muted mt-auto">Halaman 1</small>
+                </div>
+            </div>
+
+            <!-- Page 3 -->
+            <div class="book-page p-4 d-flex flex-column" id="page3">
+                <div class="border border-primary h-100 p-3 d-flex flex-column">
+                    <h3 class="menu-title text-center mb-4 pb-2">Non-Coffee</h3>
+                    <div class="menu-list flex-grow-1">
+                        <div class="menu-item d-flex justify-content-between align-items-baseline mb-3 pb-2">
+                            <div><h5 class="h6 text-primary mb-0 fw-bold">Matcha Fusion</h5><small class="text-muted fst-italic">Premium Japanese Matcha</small></div><span class="fw-bold text-primary">30k</span>
+                        </div>
+                        <div class="menu-item d-flex justify-content-between align-items-baseline mb-3 pb-2">
+                            <div><h5 class="h6 text-primary mb-0 fw-bold">Red Velvet</h5><small class="text-muted fst-italic">Creamy & Sweet</small></div><span class="fw-bold text-primary">28k</span>
+                        </div>
+                    </div>
+                    <small class="text-center text-muted mt-auto">Halaman 2</small>
+                </div>
+            </div>
+
+            <!-- Page 4 -->
+            <div class="book-page p-4 d-flex flex-column" id="page4">
+                <div class="border border-primary h-100 p-3 d-flex flex-column">
+                    <h3 class="menu-title text-center mb-4 pb-2">Snacks</h3>
+                    <div class="menu-list flex-grow-1">
+                        <div class="menu-item d-flex justify-content-between align-items-baseline mb-3 pb-2">
+                            <div><h5 class="h6 text-primary mb-0 fw-bold">Mix Platter</h5><small class="text-muted fst-italic">Sausage, Nuggets, Fries</small></div><span class="fw-bold text-primary">35k</span>
+                        </div>
+                        <div class="menu-item d-flex justify-content-between align-items-baseline mb-3 pb-2">
+                            <div><h5 class="h6 text-primary mb-0 fw-bold">Singkong Keju</h5><small class="text-muted fst-italic">Crispy Cassava</small></div><span class="fw-bold text-primary">18k</span>
+                        </div>
+                    </div>
+                    <small class="text-center text-muted mt-auto">Halaman 3</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group mt-5 shadow" role="group">
+            <button type="button" class="btn btn-primary px-4 py-2" id="prevBtn" onclick="prevPage()" disabled><i class="fas fa-chevron-left me-2"></i> Tutup</button>
+            <button type="button" class="btn btn-primary px-4 py-2" id="nextBtn" onclick="nextPage()">Buka Menu <i class="fas fa-chevron-right ms-2"></i></button>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION WITH CHARTJS -->
+    <section id="about" class="py-5 bg-white">
+        <div class="container py-5">
+            <div class="row align-items-center g-5">
+                <!-- Text Column -->
+                <div class="col-lg-5">
+                    <h2 class="display-5 fw-bold text-primary mb-4">Statistik & Cerita</h2>
+                    <p class="lead text-muted">Kami bangga dengan transparansi kualitas kami.</p>
+                    <p>
+                        Grafik di samping menunjukkan preferensi pelanggan kami terhadap jenis kopi yang kami sajikan setiap bulannya. Espresso Robusta tetap menjadi primadona bagi penikmat kopi sejati di Jakarta Selatan.
+                    </p>
+                    <div class="d-flex gap-3 mt-4">
+                        <div class="text-center px-3 border-end">
+                            <h3 class="h2 fw-bold text-secondary mb-0">10+</h3>
+                            <small class="text-muted">Jenis Biji</small>
+                        </div>
+                        <div class="text-center px-3 border-end">
+                            <h3 class="h2 fw-bold text-secondary mb-0">5k+</h3>
+                            <small class="text-muted">Pelanggan</small>
+                        </div>
+                        <div class="text-center px-3">
+                            <h3 class="h2 fw-bold text-secondary mb-0">2024</h3>
+                            <small class="text-muted">Didirikan</small>
+                        </div>
+                    </div>
+                </div>
+                <!-- Chart Column (Menggantikan SVG) -->
+                <div class="col-lg-7">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body p-4">
+                            <h5 class="card-title text-center text-primary mb-4 fw-bold">Kopi Terfavorit Bulan Ini</h5>
+                            <!-- Canvas untuk Chart.js -->
+                            <canvas id="aboutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="contact" class="bg-dark text-light py-5">
+        <div class="container text-center">
+            <h3 class="font-monospace mb-3" style="font-family: 'Playfair Display', serif;">Senja Coffee</h3>
+            <p class="text-white-50">Jl. Kenangan No. 24, Jakarta Selatan</p>
+            <div class="my-4">
+                <a href="#" class="btn btn-outline-light btn-sm rounded-circle mx-1"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="btn btn-outline-light btn-sm rounded-circle mx-1"><i class="fab fa-whatsapp"></i></a>
+            </div>
+            <hr class="border-secondary w-50 mx-auto">
+            <small class="text-white-50">&copy; 2024 Senja Coffee. Built with Bootstrap 5 & Chart.js.</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- 1. HORIZONTAL SCROLL LOGIC (EXISTING) ---
+        const stickyParent = document.querySelector('.horizontal-scroll-wrapper');
+        const horizontalTrack = document.querySelector('.horizontal-track');
+        const slides = document.querySelectorAll('.h-slide');
+
+        function transformScroll() {
+            const scrollY = window.scrollY;
+            const parentTop = stickyParent.offsetTop;
+            const scrollDistance = stickyParent.offsetHeight - window.innerHeight;
+
+            if (scrollY >= parentTop && scrollY <= (parentTop + scrollDistance)) {
+                const scrolled = scrollY - parentTop;
+                const trackWidth = horizontalTrack.offsetWidth;
+                const viewportWidth = window.innerWidth;
+                const maxTranslate = trackWidth - viewportWidth;
+                
+                const percentage = scrolled / scrollDistance;
+                const translateX = percentage * maxTranslate;
+
+                horizontalTrack.style.transform = `translateX(-${translateX}px)`;
+
+                const slideIndex = Math.round(percentage * (slides.length - 1));
+                slides.forEach((slide, index) => {
+                    if(index === slideIndex) slide.classList.add('active');
+                    else slide.classList.remove('active');
+                });
+            } else if (scrollY < parentTop) {
+                horizontalTrack.style.transform = `translateX(0px)`;
+                slides[0].classList.add('active');
+            } else {
+                const trackWidth = horizontalTrack.offsetWidth;
+                const viewportWidth = window.innerWidth;
+                horizontalTrack.style.transform = `translateX(-${trackWidth - viewportWidth}px)`;
+                slides[slides.length-1].classList.add('active');
+            }
+
+            // Panggil fungsi active menu setiap kali scroll
+            updateActiveNav();
+        }
+
+        window.addEventListener('scroll', transformScroll);
+        window.addEventListener('resize', transformScroll);
+        
+        // --- 2. BOOK FLIP LOGIC (EXISTING) ---
+        let currentPage = 1;
+        const totalPages = 4;
+        let currentScale = 1;
+
+        function updateButtons() {
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+
+            prevBtn.disabled = (currentPage === 1);
+            nextBtn.disabled = (currentPage === totalPages);
+
+            if (currentPage === 1) {
+                nextBtn.innerHTML = 'Buka Menu <i class="fas fa-chevron-right ms-2"></i>';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left me-2"></i> Tutup';
+            } else {
+                nextBtn.innerHTML = 'Berikutnya <i class="fas fa-chevron-right ms-2"></i>';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left me-2"></i> Sebelumnya';
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                document.getElementById(`page${currentPage}`).classList.add('flipped');
+                currentPage++;
+                updateButtons();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                document.getElementById(`page${currentPage}`).classList.remove('flipped');
+                updateButtons();
+            }
+        }
+
+        function zoomBook(delta) {
+            currentScale += delta;
+            if (currentScale < 0.5) currentScale = 0.5;
+            if (currentScale > 2.0) currentScale = 2.0;
+            document.querySelector('.book-container').style.transform = `scale(${currentScale})`;
+        }
+
+        function resetZoom() {
+            currentScale = 1;
+            document.querySelector('.book-container').style.transform = `scale(1)`;
+        }
+
+        // --- 3. FITUR JS BARU: ACTIVE MENU HANDLER ---
+        // Kita butuh handler manual karena section Home tingginya 400vh
+        // Bootstrap scrollspy standar akan bingung.
+        function updateActiveNav() {
+            const sections = ['home', 'menu', 'about', 'contact'];
+            const scrollY = window.scrollY;
+            
+            // Definisikan offset area untuk masing-masing section
+            const homeSection = document.getElementById('home');
+            const menuSection = document.getElementById('menu');
+            const aboutSection = document.getElementById('about');
+            const contactSection = document.getElementById('contact');
+
+            let current = '';
+
+            // Logika Home: Aktif selama kita berada di dalam wrapper scroll horizontal
+            if (scrollY < homeSection.offsetTop + homeSection.offsetHeight - 200) {
+                current = 'home';
+            } 
+            // Logika Menu
+            else if (scrollY >= menuSection.offsetTop - 200 && scrollY < aboutSection.offsetTop - 200) {
+                current = 'menu';
+            }
+            // Logika About
+            else if (scrollY >= aboutSection.offsetTop - 200 && scrollY < contactSection.offsetTop - 200) {
+                current = 'about';
+            }
+            // Logika Contact
+            else if (scrollY >= contactSection.offsetTop - 400) { // Offset besar karena footer pendek
+                current = 'contact';
+            }
+
+            // Hapus kelas active dari semua nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // --- 4. FITUR JS BARU: SMOOTH AUTOSCROLL ---
+        function smoothScroll(event, targetId) {
+            event.preventDefault();
+            const targetElement = document.getElementById(targetId);
+            
+            // Khusus untuk 'menu', kita mau scroll tepat setelah horizontal wrapper selesai
+            if (targetId === 'home') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // --- 5. FITUR JS BARU: CHART.JS INTEGRATION ---
+        document.addEventListener("DOMContentLoaded", function() {
+            const ctx = document.getElementById('aboutChart').getContext('2d');
+            
+            // Data Statis (Nantinya bisa dari Database)
+            const coffeeData = {
+                labels: ['Espresso Robusta', 'Aren Latte', 'Caramel Macchiato', 'Manual Brew', 'Non-Coffee'],
+                datasets: [{
+                    label: 'Terjual (Gelas)',
+                    data: [450, 320, 280, 150, 200], // Data dummy numerik
+                    backgroundColor: [
+                        '#4A3B32', // Primary
+                        '#8D6E63', // Secondary
+                        '#C5A059', // Gold
+                        '#2D1B15', // Dark
+                        '#A89F91'  // Greyish
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 1
+                }]
+            };
+
+            const config = {
+                type: 'bar', // Jenis grafik: Bar Chart
+                data: coffeeData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Sembunyikan legend default agar lebih bersih
+                        }
+                    }
+                }
+            };
+
+            new Chart(ctx, config);
+        });
+
+        // Init Functions
+        transformScroll();
+        updateButtons();
+    </script>
+</body>
+</html>
